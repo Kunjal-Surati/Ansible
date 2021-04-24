@@ -1,0 +1,24 @@
+---
+- name: Download latest artifact from nexus server to localhost
+  hosts: localhost
+  become: true
+  tasks: 
+   - name: Download the war file from nexus using api
+     shell: 'curl -u admin:admin -L "http://172.20.10.110:8081/service/rest/v1/search/assets/download?sort=version&repository=MyLab-RELEASE&maven.groupId=com.kunjaldevopslab&maven.artifactId=KunjalDevOpsLab&maven.extension=war" -H "accept: application/json" --output /home/ansibleadmin/MyLab.war'
+     args:
+        chdir: /home/ansibleadmin
+
+
+- name: deploy latest war file to tomcat server
+  hosts: Tomcat_Server
+  become: true
+  tasks:
+    - name: Copy war to webapp folder in tomcat server
+      copy:
+        src: "{{ item }}"
+        dest: "/opt/apache-tomcat-9.0.45/webapps/"
+      with_fileglob:
+        - "/home/ansibleadmin/*.war"
+
+
+...
